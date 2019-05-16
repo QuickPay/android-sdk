@@ -1,5 +1,6 @@
 package net.quickpay.quickpayexample
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -14,12 +15,15 @@ class ShopItemComponent : Fragment() {
         private const val STATE_COUNT = "count"
     }
 
+
     // Fields
-    var callback: ShopItemComponentInterface? = null
+
+    var listener: ShopItemComponentListener? = null
     var counter: Int = 0
 
 
     // Lifecycle
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.shop_item_component_fragment, container, true)
     }
@@ -30,14 +34,14 @@ class ShopItemComponent : Fragment() {
 
         view.findViewById<Button>(R.id.shop_item_component_fragment_addbutton)?.setOnClickListener {
             counter++
-            callback?.counterChanged(counter)
+            listener?.counterChanged(this, counter)
         }
 
         view.findViewById<Button>(R.id.shop_item_component_fragment_removebutton)?.setOnClickListener {
             if (counter > 0) {
                 counter--
             }
-            callback?.counterChanged(counter)
+            listener?.counterChanged(this, counter)
         }
     }
 
@@ -46,15 +50,35 @@ class ShopItemComponent : Fragment() {
         outState.putInt(STATE_COUNT, counter)
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        if (context is ShopItemComponentListener) {
+            listener = context
+        }
+        else {
+            throw RuntimeException("$context must implement ShopItemComponentListener")
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        listener = null
+    }
+
 
     // Utils
+
     fun setImage(res: Int) {
         view?.findViewById<ImageView>(R.id.shop_item_component_fragment_image)?.setImageResource(res)
     }
-}
 
-interface ShopItemComponentInterface {
 
-    fun counterChanged(count: Int)
+    // Communication interfaces
 
+    interface ShopItemComponentListener {
+
+        fun counterChanged(component: ShopItemComponent, count: Int)
+
+    }
 }
