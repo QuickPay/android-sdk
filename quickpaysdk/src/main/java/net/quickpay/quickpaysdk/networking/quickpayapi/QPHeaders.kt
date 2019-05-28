@@ -1,4 +1,4 @@
-package net.quickpay.quickpaysdk.networking
+package net.quickpay.quickpaysdk.networking.quickpayapi
 
 import android.util.Base64
 import net.quickpay.quickpaysdk.QuickPay
@@ -11,7 +11,7 @@ internal class QPHeaders {
         get() = "v10"
 
     val apiKey
-        get() = QuickPay.apiKey
+        get() = QuickPay.instance.apiKey
 
 
     // Auth
