@@ -3,6 +3,7 @@ package net.quickpay.quickpayexample
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import net.quickpay.quickpaysdk.PaymentMethodsFragment
@@ -18,7 +19,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
     }
 
 
-    // Fields
+    // Properties
 
     private var shopItemCompomentTshit: ShopItemComponent? = null
     private var shopItemCompomentFootball: ShopItemComponent? = null
@@ -32,8 +33,6 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
 
         // Init the QuickPay API
         QuickPay.init("f1a4b80189c73862655552d06f9419dd7574c65de916fef88cf9854f6907f1b4", this)
-        QuickPay.instance.checkClearhaus()
-        QuickPay.instance.checkMobilePay()
 
         shopItemCompomentFootball = supportFragmentManager.findFragmentById(R.id.shop_soccerball_fragment) as ShopItemComponent
         shopItemCompomentFootball?.setImage(R.drawable.soccerball)
@@ -42,6 +41,17 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
         shopItemCompomentTshit?.setImage(R.drawable.tshirt)
 
         updateSummary()
+    }
+
+
+    // Buttons
+
+    fun onCreditCardClicked(v: View) {
+        // TODO: Handle credit card
+    }
+
+    fun onMobilePayClicked(v: View) {
+        // TODO: Handle mobile pay
     }
 
 
