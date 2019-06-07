@@ -2,14 +2,16 @@ package net.quickpay.quickpayexample
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import net.quickpay.quickpaysdk.PaymentMethodsFragment
 import net.quickpay.quickpaysdk.QuickPay
 import net.quickpay.quickpaysdk.dummy.DummyContent
-
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.payments.QPCreatePaymentParameters
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.payments.QPCreatePaymentRequest
+import java.util.*
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentInteractionListener, ShopItemComponent.ShopItemComponentListener {
 
@@ -47,7 +49,19 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
     // Buttons
 
     fun onCreditCardClicked(v: View) {
-        // TODO: Handle credit card
+        var uuid = UUID.randomUUID().toString()
+        uuid = uuid.replace("-", "")
+        uuid = uuid.substring(1)
+        QuickPay.log("ORDER_ID: $uuid")
+
+        var params = QPCreatePaymentParameters("DKK", uuid)
+        var request = QPCreatePaymentRequest(params)
+
+        request.sendRequest( successListerner = {
+            QuickPay.log("WEEEEE: ${it.id}")
+        }, errorListener = {
+            QuickPay.log("NOOOOOO")
+        })
     }
 
     fun onMobilePayClicked(v: View) {

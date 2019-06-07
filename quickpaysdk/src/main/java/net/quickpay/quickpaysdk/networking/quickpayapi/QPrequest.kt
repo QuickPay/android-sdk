@@ -1,6 +1,6 @@
 package net.quickpay.quickpaysdk.networking.quickpayapi
 
-internal open class QPrequest {
+open class QPrequest {
 
     // Properties
 

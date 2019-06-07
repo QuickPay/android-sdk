@@ -5,7 +5,6 @@ import android.util.Log;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;
-import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonRequest;
@@ -16,7 +15,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Iterator;
 import java.util.Map;
 
 public class ObjectRequest<T> extends JsonRequest<T> {
@@ -29,15 +27,13 @@ public class ObjectRequest<T> extends JsonRequest<T> {
     private static final String PROTOCOL_CHARSET="utf-8";
     private static final String TAG="ObjectRequest";
     private Map<String, String> mHeaders;
-    private Map<String, Object> mParams;
 
-    public ObjectRequest(int method, String url, Map<String, Object> params, Class clazz,
+    public ObjectRequest(int method, String url, JSONObject params, Class clazz,
                          Response.Listener<T> listener, Response.ErrorListener errorListener) {
         super(method, url, new Gson().toJson(params), listener, errorListener);
         this.clazz = clazz;
         this.listener = listener;
         if(params!=null){
-            mParams = params;
             mRequestBody = new Gson().toJson(params);
         }
         this.mMethod = method;
@@ -51,24 +47,6 @@ public class ObjectRequest<T> extends JsonRequest<T> {
 
     @Override
     public String getUrl() {
-        if(mMethod == Request.Method.GET) {
-            StringBuilder stringBuilder = new StringBuilder(mUrl);
-            if (mParams != null) {
-                Iterator<Map.Entry<String, Object>> iterator = mParams.entrySet().iterator();
-                int i = 1;
-                while (iterator.hasNext()) {
-                    Map.Entry<String, Object> entry = iterator.next();
-                    if(i == 1) {
-                        stringBuilder.append("?" + entry.getKey() + "=" + entry.getValue());
-                    } else {
-                        stringBuilder.append("&" + entry.getKey() + "=" + entry.getValue());
-                    }
-                    iterator.remove(); // avoids a ConcurrentModificationException
-                    i++;
-                }
-                mUrl = stringBuilder.toString();
-            }
-        }
         return mUrl;
     }
 
