@@ -1,17 +1,19 @@
 package net.quickpay.quickpayexample
 
+import android.app.Activity
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.design.widget.TabLayout
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import net.quickpay.quickpaysdk.PaymentMethodsFragment
 import net.quickpay.quickpaysdk.QuickPay
+import net.quickpay.quickpaysdk.QuickPayActivity
 import net.quickpay.quickpaysdk.dummy.DummyContent
-import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.payments.QPCreatePaymentParameters
-import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.payments.QPCreatePaymentRequest
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.payments.*
 import java.util.*
-import kotlin.random.Random
 
 class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentInteractionListener, ShopItemComponent.ShopItemComponentListener {
 
@@ -25,7 +27,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
 
     private var shopItemCompomentTshit: ShopItemComponent? = null
     private var shopItemCompomentFootball: ShopItemComponent? = null
-
+    private var currentPaymentId: Int? = null
 
     // Lifecycle
 
@@ -51,7 +53,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
     fun onCreditCardClicked(v: View) {
         var uuid = UUID.randomUUID().toString()
         uuid = uuid.replace("-", "")
-        uuid = uuid.substring(1)
+        uuid = uuid.substring(15)
         QuickPay.log("ORDER_ID: $uuid")
 
         var params = QPCreatePaymentParameters("DKK", uuid)
@@ -59,6 +61,23 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
 
         request.sendRequest( successListerner = {
             QuickPay.log("WEEEEE: ${it.id}")
+            currentPaymentId = it.id
+
+            var makeLinkRequestParams = QPCreatePaymentLinkParameters(it.id, 100.0)
+            var makeLinkRequest = QPCreatePaymentLinkRequest(makeLinkRequestParams)
+
+            makeLinkRequest.sendRequest(successListerner = {
+                QuickPay.log("CREATE LINK YESSSS: ${it.url}")
+
+
+                // Now the fun begins
+                QuickPayActivity.openQuickPayPaymentURL(this, it.url)
+
+            }, errorListener = {
+                QuickPay.log("CREATE LINK NOOOO")
+            })
+
+
         }, errorListener = {
             QuickPay.log("NOOOOOO")
         })
@@ -94,5 +113,35 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
 
     override fun onListFragmentInteraction(item: DummyContent.DummyItem?) {
         Toast.makeText(this, "HEJSA", Toast.LENGTH_SHORT).show()
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == QuickPayActivity.QUICKPAY_INTENT_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+
+                QuickPay.log("DATA: ${data?.data}")
+
+                val returnedResult = data!!.data!!.toString()
+                if (returnedResult == QuickPayActivity.SUCCESS_RESULT) {
+
+                    if (currentPaymentId != null) {
+                        var paymentId = currentPaymentId
+                        QPGetPaymentRequest(paymentId ?: 0).sendRequest(successListerner = {
+                            Toast.makeText(this, "Success: ${it.acquirer}", Toast.LENGTH_LONG).show()1$
+                        }, errorListener = {
+                            QuickPay.log("NOT GOOOOOOD")
+                        })
+                    }
+                }
+                else if (returnedResult == QuickPayActivity.CANCEL_RESULT) {
+                    val toast = Toast.makeText(this, "Result: $returnedResult", Toast.LENGTH_LONG)
+                    toast.show()
+                }
+            }
+            else if (resultCode == Activity.RESULT_CANCELED) {
+                val toast = Toast.makeText(this, "The user cancelled out of the activity", Toast.LENGTH_LONG)
+                toast.show()
+            }
+        }
     }
 }
