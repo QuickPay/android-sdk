@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.design.widget.TabLayout
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -13,7 +12,7 @@ import net.quickpay.quickpaysdk.QuickPay
 import net.quickpay.quickpaysdk.QuickPayActivity
 import net.quickpay.quickpaysdk.dummy.DummyContent
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.payments.*
-import java.util.*
+import java.util.UUID
 
 class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentInteractionListener, ShopItemComponent.ShopItemComponentListener {
 
@@ -84,7 +83,37 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
     }
 
     fun onMobilePayClicked(v: View) {
-        // TODO: Handle mobile pay
+        var uuid = UUID.randomUUID().toString()
+        uuid = uuid.replace("-", "")
+        uuid = uuid.substring(15)
+        QuickPay.log("ORDER_ID: $uuid")
+
+        var params = QPCreatePaymentParameters("DKK", uuid)
+        var request = QPCreatePaymentRequest(params)
+
+        request.sendRequest( successListerner = {
+            QuickPay.log("WEEEEE: ${it.id}")
+            currentPaymentId = it.id
+
+
+            var mpp = MobilePayParameters("quickpayexampleshop://open", "dk", "https://quickpay.net/images/payment-methods/payment-methods.png")
+            var sessionParams = QPCreatePaymentSessionParameters(100, mpp)
+            var sessionRequest = QPCreatePaymentSessionRequest(it.id, sessionParams)
+
+            sessionRequest.sendRequest(successListerner = {
+                QuickPay.log("SESSION OK")
+
+                QuickPay.instance.authorizeWithMobilePay(it, listener = {
+
+                })
+
+            }, errorListener = {
+                QuickPay.log("SESSION FAILED")
+            })
+
+        }, errorListener = {
+            QuickPay.log("NOOOOOO")
+        })
     }
 
 
@@ -127,7 +156,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
                     if (currentPaymentId != null) {
                         var paymentId = currentPaymentId
                         QPGetPaymentRequest(paymentId ?: 0).sendRequest(successListerner = {
-                            Toast.makeText(this, "Success: ${it.acquirer}", Toast.LENGTH_LONG).show()1$
+                            Toast.makeText(this, "Success: ${it.acquirer}", Toast.LENGTH_LONG).show()
                         }, errorListener = {
                             QuickPay.log("NOT GOOOOOOD")
                         })

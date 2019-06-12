@@ -1,5 +1,6 @@
 package net.quickpay.quickpaysdk
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,6 +12,7 @@ import com.android.volley.Response
 import net.quickpay.quickpaysdk.networking.NetworkUtility
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.acquirers.QPGetAcquireSettingsClearhausRequest
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.acquirers.QPGetAcquireSettingsMobilePayRequest
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.models.QPPayment
 import java.lang.RuntimeException
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -60,7 +62,7 @@ class QuickPay(apiKey: String, context: Context) {
     var apiKey: String = apiKey
     var context: Context = context
 
-    public fun fetchAquires() {
+    fun fetchAquires() {
         isInitializing = true
         initializeListener?.initializationStarted()
 
@@ -71,9 +73,11 @@ class QuickPay(apiKey: String, context: Context) {
     }
 
 
-    //Fetch Aquires
 
-    public fun isMobilePayEnabled(callback: (Boolean)->Unit) {
+
+    // MobilePay
+
+    fun isMobilePayEnabled(callback: (Boolean)->Unit) {
         QPGetAcquireSettingsMobilePayRequest().sendRequest(Response.Listener {
             log("MobilePay enabled: ${it.active}")
             callback(it.active)
@@ -82,10 +86,28 @@ class QuickPay(apiKey: String, context: Context) {
         })
     }
 
-    public fun isMobilePayAvailableOnDevice(): Boolean {
+    fun isMobilePayAvailableOnDevice(): Boolean {
+        val a: Activity? = null
+        a.startActivity
         val mobilePayIntent: Intent = Uri.parse("mobilepayonline://").let { mobilePay -> Intent(Intent.ACTION_VIEW, mobilePay) }
         val activities: List<ResolveInfo> = context.packageManager.queryIntentActivities(mobilePayIntent, PackageManager.MATCH_DEFAULT_ONLY)
         return activities.isNotEmpty()
      }
 
+    fun authorizeWithMobilePay(payment: QPPayment, listener: (QPPayment)->Unit) {
+        val mobilePayToken = payment.operations?.get(0)?.data?.get("session_token")
+
+        if (mobilePayToken.isNullOrEmpty()) {
+            QuickPay.log("MobielPay Token is NULL")
+        }
+        else {
+            QuickPay.log("MobilePay Token: $mobilePayToken")
+
+            var mpUrl = "mobilepayonline://online?sessiontoken=$mobilePayToken&version=2"
+            val mobilePayIntent: Intent = Uri.parse(mpUrl).let { mobilePay -> Intent(Intent.ACTION_VIEW, mobilePay) }
+            context.startActivity(mobilePayIntent)
+        }
+
+
+    }
 }
