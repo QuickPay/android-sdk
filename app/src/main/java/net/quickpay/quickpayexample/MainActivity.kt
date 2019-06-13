@@ -11,7 +11,12 @@ import net.quickpay.quickpaysdk.PaymentMethodsFragment
 import net.quickpay.quickpaysdk.QuickPay
 import net.quickpay.quickpaysdk.QuickPayActivity
 import net.quickpay.quickpaysdk.dummy.DummyContent
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.models.QPBasket
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.payments.*
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.subscriptions.QPCreateSubscriptionLinkParameters
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.subscriptions.QPCreateSubscriptionLinkRequest
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.subscriptions.QPCreateSubscriptionParameters
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.subscriptions.QPCreateSubscriptionRequest
 import java.util.UUID
 
 class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentInteractionListener, ShopItemComponent.ShopItemComponentListener {
@@ -19,6 +24,8 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
     companion object {
         private const val TSHIRT_PRICE = 1.0
         private const val FOOTBALL_PRICE = 0.5
+
+        private const val INT_KEY = "HDJSAKDHJKASJD"
     }
 
 
@@ -26,13 +33,16 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
 
     private var shopItemCompomentTshit: ShopItemComponent? = null
     private var shopItemCompomentFootball: ShopItemComponent? = null
-    private var currentPaymentId: Int? = null
+    private var currentPaymentId: Int = 0
+    private var currentSubscriptionId: Int = 0
 
     // Lifecycle
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        currentPaymentId = savedInstanceState?.getInt(INT_KEY) ?: 0
 
         // Init the QuickPay API
         QuickPay.init("f1a4b80189c73862655552d06f9419dd7574c65de916fef88cf9854f6907f1b4", this)
@@ -44,6 +54,29 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
         shopItemCompomentTshit?.setImage(R.drawable.tshirt)
 
         updateSummary()
+
+        onMobilePayReturn(intent)
+    }
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.run {
+            putInt(INT_KEY, currentPaymentId)
+        }
+
+        super.onSaveInstanceState(outState)
+    }
+
+    fun onMobilePayReturn(intent: Intent) {
+        if (intent.data == null) {
+            return
+        }
+
+        if (intent.data.scheme.equals("quickpayexample")) {
+            QuickPay.log("MainActivity id: $currentPaymentId")
+            QuickPay.log("QuickPay id: ${QuickPay.instance.paymentId}")
+            QuickPay.log("Intent: $intent")
+        }
     }
 
 
@@ -82,6 +115,37 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
         })
     }
 
+    fun onSubscriptionClicked(v: View) {
+        var uuid = UUID.randomUUID().toString()
+        uuid = uuid.replace("-", "")
+        uuid = uuid.substring(15)
+        QuickPay.log("Subscription ID: $uuid")
+
+        var params = QPCreateSubscriptionParameters("DKK", uuid, "QuickPay Example Shop Subscription")
+        params.basket?.add(QPBasket(3, "123", "Test item", 56.0, 0.25))
+
+        var request = QPCreateSubscriptionRequest(params)
+
+        request.sendRequest(successListerner = {
+            QuickPay.log("SUBSCRIPTION: Created with id ${it.id}")
+            currentSubscriptionId = it.id
+
+            var subscriptionLinkParams = QPCreateSubscriptionLinkParameters(it.id, 1000.0)
+            var subscriptionLinkRequest = QPCreateSubscriptionLinkRequest(subscriptionLinkParams)
+
+            subscriptionLinkRequest.sendRequest(successListerner = {
+                QuickPay.log("SUBSCRIPTION: Link created ${it.url}")
+
+                QuickPayActivity.openQuickPayPaymentURL(this, it.url)
+            }, errorListener = {
+                QuickPay.log("SUBSCRIPTION LINK: BAHHHHHH")
+            })
+
+        }, errorListener = {
+            QuickPay.log("SUBSCRIPTION: BAHHHHHH")
+        })
+    }
+
     fun onMobilePayClicked(v: View) {
         var uuid = UUID.randomUUID().toString()
         uuid = uuid.replace("-", "")
@@ -96,17 +160,13 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
             currentPaymentId = it.id
 
 
-            var mpp = MobilePayParameters("quickpayexampleshop://open", "dk", "https://quickpay.net/images/payment-methods/payment-methods.png")
+            var mpp = MobilePayParameters("quickpayexample://open?paymentid=${it.id}", "dk", "https://quickpay.net/images/payment-methods/payment-methods.png")
             var sessionParams = QPCreatePaymentSessionParameters(100, mpp)
             var sessionRequest = QPCreatePaymentSessionRequest(it.id, sessionParams)
 
             sessionRequest.sendRequest(successListerner = {
                 QuickPay.log("SESSION OK")
-
-                QuickPay.instance.authorizeWithMobilePay(it, listener = {
-
-                })
-
+                QuickPay.instance.authorizeWithMobilePay(it)
             }, errorListener = {
                 QuickPay.log("SESSION FAILED")
             })
@@ -153,13 +213,17 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
                 val returnedResult = data!!.data!!.toString()
                 if (returnedResult == QuickPayActivity.SUCCESS_RESULT) {
 
-                    if (currentPaymentId != null) {
+                    if (currentPaymentId > 0) {
                         var paymentId = currentPaymentId
+                        currentPaymentId = 0
                         QPGetPaymentRequest(paymentId ?: 0).sendRequest(successListerner = {
                             Toast.makeText(this, "Success: ${it.acquirer}", Toast.LENGTH_LONG).show()
                         }, errorListener = {
                             QuickPay.log("NOT GOOOOOOD")
                         })
+                    }
+                    else if (currentSubscriptionId > 0) {
+                        // TODO - Check the subscription state here
                     }
                 }
                 else if (returnedResult == QuickPayActivity.CANCEL_RESULT) {

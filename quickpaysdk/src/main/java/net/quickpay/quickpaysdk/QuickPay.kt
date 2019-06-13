@@ -87,25 +87,28 @@ class QuickPay(apiKey: String, context: Context) {
     }
 
     fun isMobilePayAvailableOnDevice(): Boolean {
-        val a: Activity? = null
-        a.startActivity
         val mobilePayIntent: Intent = Uri.parse("mobilepayonline://").let { mobilePay -> Intent(Intent.ACTION_VIEW, mobilePay) }
         val activities: List<ResolveInfo> = context.packageManager.queryIntentActivities(mobilePayIntent, PackageManager.MATCH_DEFAULT_ONLY)
         return activities.isNotEmpty()
      }
 
-    fun authorizeWithMobilePay(payment: QPPayment, listener: (QPPayment)->Unit) {
+    public var paymentId: Int? = null
+    fun authorizeWithMobilePay(payment: QPPayment) {
         val mobilePayToken = payment.operations?.get(0)?.data?.get("session_token")
+        paymentId = payment.id
 
         if (mobilePayToken.isNullOrEmpty()) {
-            QuickPay.log("MobielPay Token is NULL")
+            QuickPay.log("MobilePay Token is NULL")
         }
         else {
             QuickPay.log("MobilePay Token: $mobilePayToken")
 
             var mpUrl = "mobilepayonline://online?sessiontoken=$mobilePayToken&version=2"
             val mobilePayIntent: Intent = Uri.parse(mpUrl).let { mobilePay -> Intent(Intent.ACTION_VIEW, mobilePay) }
-            context.startActivity(mobilePayIntent)
+
+            var activity: Activity? = context as Activity
+            activity?.startActivityForResult(mobilePayIntent, 1384)
+//            activity?.startActivity(mobilePayIntent)
         }
 
 
