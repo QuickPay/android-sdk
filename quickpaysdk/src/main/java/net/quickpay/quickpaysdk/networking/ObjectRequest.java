@@ -21,7 +21,6 @@ public class ObjectRequest<T> extends JsonRequest<T> {
 
     private final Class clazz;
     private final Response.Listener<T> listener;
-    private int mMethod;
     private String mUrl;
     private String mRequestBody;
     private static final String PROTOCOL_CHARSET="utf-8";
@@ -36,7 +35,6 @@ public class ObjectRequest<T> extends JsonRequest<T> {
         if(params!=null){
             mRequestBody = new Gson().toJson(params);
         }
-        this.mMethod = method;
         this.mUrl = url;
     }
 

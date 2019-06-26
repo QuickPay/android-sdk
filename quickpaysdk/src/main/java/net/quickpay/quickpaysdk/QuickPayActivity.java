@@ -6,12 +6,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.models.QPPaymentLink;
+import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.models.QPSubscriptionLink;
 
 
 public class QuickPayActivity extends AppCompatActivity {
@@ -22,17 +23,29 @@ public class QuickPayActivity extends AppCompatActivity {
     public static final String CANCEL_RESULT = "Cancel";
 
     public static final String urlPropertyName = "quickpayLink";
-    public static final String LOGTAG = "Quickpay Act";
-    public static final String DEFAULT_VERSION = "v10";
     public static final int QUICKPAY_INTENT_CODE = 1318;
 
     /**
      * Opens a view that allows you to enter payment information.
      *
-     * @param a   The activity from which to send an intent.
-     * @param URL The QuickPay url, which was created by using a GeneratePaymentLinkRequest.
+     * @param a    The activity from which to send an intent.
+     * @param link The QuickPay payment link, which was created by using a QPCreatePaymentLinkRequest.
      */
-    public static void openQuickPayPaymentURL(Activity a, String URL) {
+    public static void openQuickPayPaymentWindow(Activity a, QPPaymentLink link) {
+        openQuickPayPaymentWindow(a, link.getUrl());
+    }
+
+    /**
+     * Opens a view that allows you to enter payment information.
+     *
+     * @param a    The activity from which to send an intent.
+     * @param link The QuickPay subscription link, which was created by using a QPCreateSubscriptionLinkRequest.
+     */
+    public static void openQuickPayPaymentWindow(Activity a, QPSubscriptionLink link) {
+        openQuickPayPaymentWindow(a, link.getUrl());
+    }
+
+    private static void openQuickPayPaymentWindow(Activity a, String URL) {
         Intent intent = new Intent(a, QuickPayActivity.class);
         intent.putExtra(urlPropertyName, URL);
         a.startActivityForResult(intent, QUICKPAY_INTENT_CODE);
@@ -94,11 +107,11 @@ public class QuickPayActivity extends AppCompatActivity {
                                     WebResourceRequest request,
                                     WebResourceError error) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Log.e(LOGTAG, "onReceivedError: " + request.getUrl());
+                QuickPay.Companion.log("onReceivedError: " + request.getUrl());
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                Log.e(LOGTAG, "onReceivedError: Error: " + error.getDescription());
+                QuickPay.Companion.log("onReceivedError: Error: " + error.getDescription());
             }
         }
     }

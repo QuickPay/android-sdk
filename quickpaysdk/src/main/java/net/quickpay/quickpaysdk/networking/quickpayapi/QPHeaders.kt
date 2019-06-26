@@ -10,7 +10,7 @@ internal class QPHeaders {
     val acceptVersion
         get() = "v10"
 
-    val apiKey
+    private val apiKey
         get() = QuickPay.instance.apiKey
 
 

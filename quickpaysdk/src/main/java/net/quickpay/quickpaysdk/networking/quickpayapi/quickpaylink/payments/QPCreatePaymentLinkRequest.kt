@@ -1,48 +1,21 @@
 package net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.payments
 
 import com.android.volley.Request
-import com.android.volley.Response
-import com.google.gson.Gson
-import net.quickpay.quickpaysdk.QuickPay
-import net.quickpay.quickpaysdk.QuickPayActivity
-import net.quickpay.quickpaysdk.networking.NetworkUtility
-import net.quickpay.quickpaysdk.networking.ObjectRequest
+
 import net.quickpay.quickpaysdk.networking.quickpayapi.QPrequest
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.models.QPPaymentLink
 import org.json.JSONObject
 
-class QPCreatePaymentLinkRequest(params: QPCreatePaymentLinkParameters): QPrequest() {
+import net.quickpay.quickpaysdk.QuickPayActivity
 
-    var params: QPCreatePaymentLinkParameters = params
+class QPCreatePaymentLinkRequest(params: QPCreatePaymentLinkParameters): QPrequest<QPPaymentLink>(Request.Method.PUT, "/payments/${params.id}/link", params, QPPaymentLink::class.java) {
 
-    fun sendRequest(successListerner: (QPPaymentLink)->Unit, errorListener: ()->Unit) {
-
+    init {
         params.cancel_url = QuickPayActivity.CANCEL_URL
         params.continue_url = QuickPayActivity.CONTINUE_URL
-
-        var paramJson = Gson().toJson(params)
-        QuickPay.log(paramJson)
-
-
-        var success = Response.Listener<QPPaymentLink>() {
-            successListerner.invoke(it)
-        }
-        var error = Response.ErrorListener {
-            var error = String(it.networkResponse.data)
-
-            QuickPay.log("ERROR: $error")
-            QuickPay.log("MESSAGE: ${it.message}")
-
-            errorListener.invoke()
-        }
-
-        var request = ObjectRequest<QPPaymentLink>(Request.Method.PUT, "$quickPayApiBaseUrl/payments/${params.id}/link", this.params, QPPaymentLink::class.java, success, error)
-        request.headers = createHeaders()
-        NetworkUtility.getInstance().addNetworkRequest(request)
     }
 
 }
-
 
 class QPCreatePaymentLinkParameters(id: Int, amount: Double): JSONObject() {
 

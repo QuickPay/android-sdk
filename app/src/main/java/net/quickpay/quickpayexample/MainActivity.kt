@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.PersistableBundle
+import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -11,7 +13,7 @@ import net.quickpay.quickpaysdk.PaymentMethodsFragment
 import net.quickpay.quickpaysdk.QuickPay
 import net.quickpay.quickpaysdk.QuickPayActivity
 import net.quickpay.quickpaysdk.dummy.DummyContent
-import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.models.QPBasket
+import net.quickpay.quickpaysdk.networking.quickpayapi.QPError
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.payments.*
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.subscriptions.QPCreateSubscriptionLinkParameters
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.subscriptions.QPCreateSubscriptionLinkRequest
@@ -25,7 +27,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
         private const val TSHIRT_PRICE = 1.0
         private const val FOOTBALL_PRICE = 0.5
 
-        private const val INT_KEY = "HDJSAKDHJKASJD"
+        private const val CURRENT_ID_KEY = "CURRENT_ID_KEY"
     }
 
 
@@ -34,7 +36,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
     private var shopItemCompomentTshit: ShopItemComponent? = null
     private var shopItemCompomentFootball: ShopItemComponent? = null
     private var currentPaymentId: Int = 0
-    private var currentSubscriptionId: Int = 0
+
 
     // Lifecycle
 
@@ -42,7 +44,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        currentPaymentId = savedInstanceState?.getInt(INT_KEY) ?: 0
+        currentPaymentId = savedInstanceState?.getInt(CURRENT_ID_KEY) ?: 0
 
         // Init the QuickPay API
         QuickPay.init("f1a4b80189c73862655552d06f9419dd7574c65de916fef88cf9854f6907f1b4", this)
@@ -58,23 +60,18 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
         onMobilePayReturn(intent)
     }
 
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.run {
-            putInt(INT_KEY, currentPaymentId)
-        }
-
-        super.onSaveInstanceState(outState)
+    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
+        super.onSaveInstanceState(outState, outPersistentState)
+        outState?.putInt(CURRENT_ID_KEY, currentPaymentId)
     }
 
-    fun onMobilePayReturn(intent: Intent) {
+    private fun onMobilePayReturn(intent: Intent) {
         if (intent.data == null) {
             return
         }
 
-        if (intent.data.scheme.equals("quickpayexample")) {
+        if (intent.data?.scheme?.equals("quickpayexample") == true) {
             QuickPay.log("MainActivity id: $currentPaymentId")
-            QuickPay.log("QuickPay id: ${QuickPay.instance.paymentId}")
             QuickPay.log("Intent: $intent")
         }
     }
@@ -83,70 +80,27 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
     // Buttons
 
     fun onCreditCardClicked(v: View) {
-        var uuid = UUID.randomUUID().toString()
-        uuid = uuid.replace("-", "")
-        uuid = uuid.substring(15)
-        QuickPay.log("ORDER_ID: $uuid")
+        val createPaymentParams = QPCreatePaymentParameters("DKK", createRandomOrderId())
+        val createPaymentRequest = QPCreatePaymentRequest(createPaymentParams)
 
-        var params = QPCreatePaymentParameters("DKK", uuid)
-        var request = QPCreatePaymentRequest(params)
+        createPaymentRequest.sendRequest(listener = { payment ->
+            QuickPay.log("Create Payment Success - Id = ${payment.id}")
+            currentPaymentId = payment.id
 
-        request.sendRequest( successListerner = {
-            QuickPay.log("WEEEEE: ${it.id}")
-            currentPaymentId = it.id
+            val createPaymentLinkParameters = QPCreatePaymentLinkParameters(payment.id, 100.0)
+            val createPaymentLinkRequest = QPCreatePaymentLinkRequest(createPaymentLinkParameters)
 
-            var makeLinkRequestParams = QPCreatePaymentLinkParameters(it.id, 100.0)
-            var makeLinkRequest = QPCreatePaymentLinkRequest(makeLinkRequestParams)
+            createPaymentLinkRequest.sendRequest(listener = { paymentLink ->
+                QuickPay.log("Create Payment Link Success - Url = ${paymentLink.url}")
 
-            makeLinkRequest.sendRequest(successListerner = {
-                QuickPay.log("CREATE LINK YESSSS: ${it.url}")
-
-
-                // Now the fun begins
-                QuickPayActivity.openQuickPayPaymentURL(this, it.url)
-
-            }, errorListener = {
-                QuickPay.log("CREATE LINK NOOOO")
-            })
-
-
-        }, errorListener = {
-            QuickPay.log("NOOOOOO")
-        })
-    }
-
-    fun onSubscriptionClicked(v: View) {
-        var uuid = UUID.randomUUID().toString()
-        uuid = uuid.replace("-", "")
-        uuid = uuid.substring(15)
-        QuickPay.log("Subscription ID: $uuid")
-
-        var params = QPCreateSubscriptionParameters("DKK", uuid, "QuickPay Example Shop Subscription")
-        params.basket?.add(QPBasket(3, "123", "Test item", 56.0, 0.25))
-
-        var request = QPCreateSubscriptionRequest(params)
-
-        request.sendRequest(successListerner = {
-            QuickPay.log("SUBSCRIPTION: Created with id ${it.id}")
-            currentSubscriptionId = it.id
-
-            var subscriptionLinkParams = QPCreateSubscriptionLinkParameters(it.id, 1000.0)
-            var subscriptionLinkRequest = QPCreateSubscriptionLinkRequest(subscriptionLinkParams)
-
-            subscriptionLinkRequest.sendRequest(successListerner = {
-                QuickPay.log("SUBSCRIPTION: Link created ${it.url}")
-
-                QuickPayActivity.openQuickPayPaymentURL(this, it.url)
-            }, errorListener = {
-                QuickPay.log("SUBSCRIPTION LINK: BAHHHHHH")
-            })
-
-        }, errorListener = {
-            QuickPay.log("SUBSCRIPTION: BAHHHHHH")
-        })
+                // Now we open the payment window
+                QuickPayActivity.openQuickPayPaymentWindow(this, paymentLink)
+            }, errorListener = ::printError)
+        }, errorListener = ::printError)
     }
 
     fun onMobilePayClicked(v: View) {
+        /*
         var uuid = UUID.randomUUID().toString()
         uuid = uuid.replace("-", "")
         uuid = uuid.substring(15)
@@ -166,7 +120,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
 
             sessionRequest.sendRequest(successListerner = {
                 QuickPay.log("SESSION OK")
-                QuickPay.instance.authorizeWithMobilePay(it)
+                QuickPay.instance.authorizeWithMobilePay(it, applicationContext)
             }, errorListener = {
                 QuickPay.log("SESSION FAILED")
             })
@@ -174,6 +128,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
         }, errorListener = {
             QuickPay.log("NOOOOOO")
         })
+        */
     }
 
 
@@ -186,13 +141,13 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
         var tshirtTotal = TSHIRT_PRICE * tShirtCount
         var footballTotal = FOOTBALL_PRICE * footballCount
 
-        findViewById<TextView>(R.id.shop_summary_tshirt_count)?.text = "T-Shirt x $tShirtCount"
-        findViewById<TextView>(R.id.shop_summary_tshirt_price)?.text = "$tshirtTotal DKK"
+        findViewById<TextView>(R.id.shop_summary_tshirt_count)?.text = String.format(resources.getString(R.string.tshirt_count), tShirtCount)
+        findViewById<TextView>(R.id.shop_summary_tshirt_price)?.text = String.format(resources.getString(R.string.total_dkk), tshirtTotal)
 
-        findViewById<TextView>(R.id.shop_summary_football_count)?.text = "T-Shirt x $tShirtCount"
-        findViewById<TextView>(R.id.shop_summary_football_price)?.text = "$footballTotal DKK"
+        findViewById<TextView>(R.id.shop_summary_football_count)?.text = String.format(resources.getString(R.string.football_count), footballCount)
+        findViewById<TextView>(R.id.shop_summary_football_price)?.text = String.format(resources.getString(R.string.total_dkk), footballTotal)
 
-        findViewById<TextView>(R.id.shop_summary_total_price)?.text = "${tshirtTotal+footballTotal} DKK"
+        findViewById<TextView>(R.id.shop_summary_total_price)?.text = String.format(resources.getString(R.string.total_dkk), tshirtTotal+footballTotal)
     }
 
 
@@ -204,26 +159,38 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnListFragmentI
         Toast.makeText(this, "HEJSA", Toast.LENGTH_SHORT).show()
     }
 
+    private fun createRandomOrderId(): String {
+        return UUID.randomUUID().toString().replace("-", "").substring(15)
+    }
+
+
+    // Error handling
+
+    private fun printError(statusCode: Int?, message: String?, error: QPError?) : Unit {
+        QuickPay.log("Request error")
+        QuickPay.log("Message: $message")
+        QuickPay.log("StatusCode: $statusCode")
+        QuickPay.log("Errors: ${error.toString()}")
+    }
+
+
+    // Lifecycle
+
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == QuickPayActivity.QUICKPAY_INTENT_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-
-                QuickPay.log("DATA: ${data?.data}")
 
                 val returnedResult = data!!.data!!.toString()
                 if (returnedResult == QuickPayActivity.SUCCESS_RESULT) {
 
                     if (currentPaymentId > 0) {
-                        var paymentId = currentPaymentId
+                        val getPaymentRequest = QPGetPaymentRequest(currentPaymentId)
+
+                        getPaymentRequest.sendRequest(listener = { payment ->
+                            Toast.makeText(this, "Success: ${payment.acquirer}", Toast.LENGTH_LONG).show()
+                        }, errorListener = ::printError)
+
                         currentPaymentId = 0
-                        QPGetPaymentRequest(paymentId ?: 0).sendRequest(successListerner = {
-                            Toast.makeText(this, "Success: ${it.acquirer}", Toast.LENGTH_LONG).show()
-                        }, errorListener = {
-                            QuickPay.log("NOT GOOOOOOD")
-                        })
-                    }
-                    else if (currentSubscriptionId > 0) {
-                        // TODO - Check the subscription state here
                     }
                 }
                 else if (returnedResult == QuickPayActivity.CANCEL_RESULT) {

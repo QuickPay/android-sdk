@@ -157,11 +157,6 @@
             android:text="Pay with Credit Card"
             android:onClick="onCreditCardClicked"/>
 
-    <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Create monthly subscription"
-            android:onClick="onSubscriptionClicked"/>
-
 
     <Button android:layout_width="wrap_content"
             android:layout_height="wrap_content"
