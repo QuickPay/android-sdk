@@ -1,4 +1,4 @@
-package net.quickpay.quickpaysdk
+package net.quickpay.quickpaysdk.ui
 
 import android.content.Context
 import android.os.Bundle
@@ -9,21 +9,18 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
-import net.quickpay.quickpaysdk.dummy.DummyContent
-import net.quickpay.quickpaysdk.dummy.DummyContent.DummyItem
+import net.quickpay.quickpaysdk.PaymentMethod
+import net.quickpay.quickpaysdk.R
 
 /**
  * A fragment representing a list of Items.
  * Activities containing this fragment MUST implement the
- * [PaymentMethodsFragment.OnListFragmentInteractionListener] interface.
+ * [PaymentMethodsFragment.OnPaymentMethodsListFragmentInteractionListener] interface.
  */
 class PaymentMethodsFragment : Fragment() {
 
-    // TODO: Customize parameters
     private var columnCount = 1
-
-    private var listener: OnListFragmentInteractionListener? = null
+    private var listener: OnPaymentMethodsListFragmentInteractionListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +40,9 @@ class PaymentMethodsFragment : Fragment() {
                     columnCount <= 1 -> LinearLayoutManager(context)
                     else -> GridLayoutManager(context, columnCount)
                 }
-                adapter = MyPaymentMethodsRecyclerViewAdapter(DummyContent.ITEMS, listener)
+                adapter = MyPaymentMethodsRecyclerViewAdapter(PaymentContent.ITEMS, listener)
+
+                addItemDecoration(MarginItemDecoration(10))
             }
         }
         return view
@@ -51,10 +50,10 @@ class PaymentMethodsFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context is OnListFragmentInteractionListener) {
+        if (context is OnPaymentMethodsListFragmentInteractionListener) {
             listener = context
         } else {
-            throw RuntimeException(context.toString() + " must implement OnListFragmentInteractionListener")
+            throw RuntimeException(context.toString() + " must implement OnPaymentMethodsListFragmentInteractionListener")
         }
     }
 
@@ -68,15 +67,9 @@ class PaymentMethodsFragment : Fragment() {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     *
-     *
-     * See the Android Training lesson
-     * [Communicating with Other Fragments](http://developer.android.com/training/basics/fragments/communicating.html)
-     * for more information.
      */
-    interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        fun onListFragmentInteraction(item: DummyItem?)
+    interface OnPaymentMethodsListFragmentInteractionListener {
+        fun onPaymentMethodSelected(item: PaymentMethod)
     }
 
     companion object {

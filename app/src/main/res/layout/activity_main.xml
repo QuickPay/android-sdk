@@ -144,23 +144,17 @@
               android:layout_marginLeft="5dp"/>
 
 
-
-    <!--
     <fragment android:id="@+id/shop_payment_methods_list"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:name="net.quickpay.quickpaysdk.PaymentMethodsFragment"/>
--->
+              android:name="net.quickpay.quickpaysdk.ui.PaymentMethodsFragment" />
 
-    <Button android:layout_width="wrap_content"
+
+    <Button android:id="@+id/shop_payment_button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Pay with Credit Card"
-            android:onClick="onCreditCardClicked"/>
-
-
-    <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pay with MobilePay"
-            android:onClick="onMobilePayClicked"/>
+            android:text="Proceed with payment"
+            android:onClick="onPaymentButtonClicked"
+            android:enabled="false"/>
 
 </LinearLayout>

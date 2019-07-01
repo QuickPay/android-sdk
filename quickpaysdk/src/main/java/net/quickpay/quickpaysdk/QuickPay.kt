@@ -108,7 +108,7 @@ class QuickPay(internal var apiKey: String) {
             var mpUrl = "${MOBILE_PAY_SCHEME}online?sessiontoken=$mobilePayToken&version=2"
             val mobilePayIntent: Intent = Uri.parse(mpUrl).let { mobilePay -> Intent(Intent.ACTION_VIEW, mobilePay) }
 
-            context.applicationContext.startActivity(mobilePayIntent)
+            context.startActivity(mobilePayIntent)
         }
     }
 }

@@ -10,5 +10,8 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         app:layoutManager="LinearLayoutManager"
-        tools:context=".PaymentMethodsFragment"
-        tools:listitem="@layout/fragment_paymentmethods"/>
+        tools:context=".ui.PaymentMethodsFragment"
+        tools:listitem="@layout/fragment_paymentmethods">
+
+
+</android.support.v7.widget.RecyclerView>
