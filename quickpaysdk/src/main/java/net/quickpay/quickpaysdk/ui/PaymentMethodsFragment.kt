@@ -42,7 +42,7 @@ class PaymentMethodsFragment : Fragment() {
                 }
                 adapter = MyPaymentMethodsRecyclerViewAdapter(PaymentContent.ITEMS, listener)
 
-                addItemDecoration(MarginItemDecoration(10))
+                addItemDecoration(MarginItemDecoration(15))
             }
         }
         return view

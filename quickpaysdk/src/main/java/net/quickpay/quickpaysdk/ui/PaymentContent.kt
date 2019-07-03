@@ -14,9 +14,8 @@ object PaymentContent {
 
     init {
         // Add the card payment
-        addItem(PaymentItem("1", PaymentMethod.PAYMENTCARD, R.drawable.ic_mobilepayhorizontal))
-        addItem(PaymentItem("2", PaymentMethod.MOBILEPAY, R.drawable.ic_mobilepayhorizontal))
-
+        addItem(PaymentItem("1", PaymentMethod.MOBILEPAY, R.drawable.ic_mobilepayhorizontal))
+        addItem(PaymentItem("2", PaymentMethod.PAYMENTCARD, R.drawable.ic_mobilepayhorizontal))
     }
 
     private fun addItem(item: PaymentItem) {
