@@ -2,18 +2,19 @@ package net.quickpay.quickpayexample
 
 import android.app.Activity
 import android.content.Intent
+import android.opengl.Visibility
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.View
 import android.widget.Button
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import net.quickpay.quickpaysdk.PaymentMethod
 import net.quickpay.quickpaysdk.ui.PaymentMethodsFragment
 import net.quickpay.quickpaysdk.QuickPay
 import net.quickpay.quickpaysdk.QuickPayActivity
-import net.quickpay.quickpaysdk.ui.PaymentContent
 import net.quickpay.quickpaysdk.networking.quickpayapi.QPError
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.payments.*
 import java.util.UUID
@@ -25,8 +26,6 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
     companion object {
         private const val TSHIRT_PRICE = 1.0
         private const val FOOTBALL_PRICE = 0.5
-
-        private const val CURRENT_ID_KEY = "CURRENT_ID_KEY"
     }
 
 
@@ -34,6 +33,8 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
 
     private var shopItemCompomentTshit: ShopItemComponent? = null
     private var shopItemCompomentFootball: ShopItemComponent? = null
+    private var progressBar: ProgressBar? = null
+    private var checkoutButton: Button? = null
     private var currentPaymentId: Int = 0
     private var selectedPaymentMethod: PaymentMethod? = null
 
@@ -44,8 +45,6 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        currentPaymentId = savedInstanceState?.getInt(CURRENT_ID_KEY) ?: 0
-
         // Init the QuickPay API
         QuickPay.init("f1a4b80189c73862655552d06f9419dd7574c65de916fef88cf9854f6907f1b4", this)
 
@@ -55,8 +54,12 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
         shopItemCompomentTshit = supportFragmentManager.findFragmentById(R.id.shop_tshirt_fragment) as ShopItemComponent
         shopItemCompomentTshit?.setImage(R.drawable.tshirt)
 
+        progressBar = findViewById(R.id.shop_progressbar)
+        checkoutButton = findViewById(R.id.shop_payment_button)
+
         updateSummary()
 
+        // TODO: Test if this is returned from MobilePay and handle it
         onMobilePayReturn(intent)
     }
 
@@ -71,13 +74,11 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?, outPersistentState: PersistableBundle?) {
-        super.onSaveInstanceState(outState, outPersistentState)
-        outState?.putInt(CURRENT_ID_KEY, currentPaymentId)
-    }
-
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == QuickPayActivity.QUICKPAY_INTENT_CODE) {
+            progressBar?.visibility = View.INVISIBLE
+            checkoutButton?.isEnabled = true
+
             if (resultCode == Activity.RESULT_OK) {
 
                 val returnedResult = data!!.data!!.toString()
@@ -87,7 +88,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
                         val getPaymentRequest = QPGetPaymentRequest(currentPaymentId)
 
                         getPaymentRequest.sendRequest(listener = { payment ->
-                            Toast.makeText(this, "Success: ${payment.acquirer}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this, "Success - Acquirer is ${payment.acquirer}", Toast.LENGTH_LONG).show()
                         }, errorListener = ::printError)
 
                         currentPaymentId = 0
@@ -109,6 +110,11 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
     // UI Buttons
 
     fun onPaymentButtonClicked(v: View) {
+        if (selectedPaymentMethod != null) {
+            progressBar?.visibility = View.VISIBLE
+            checkoutButton?.isEnabled = false
+        }
+
         if (selectedPaymentMethod == PaymentMethod.PAYMENTCARD) {
             handleCreditCardPayment()
         }
@@ -151,7 +157,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
             QuickPay.log("Create Payment Success - Id = ${payment.id}")
             currentPaymentId = payment.id
 
-            val mobilePayParameters = MobilePayParameters("quickpayexample://open?paymentid=${payment.id}", "dk", "https://quickpay.net/images/payment-methods/payment-methods.png")
+            val mobilePayParameters = MobilePayParameters("quickpayexample://mobilepayreturn", "dk", "https://quickpay.net/images/payment-methods/payment-methods.png")
             val createSessionParameters = QPCreatePaymentSessionParameters(100, mobilePayParameters)
             val createSessionRequest = QPCreatePaymentSessionRequest(payment.id, createSessionParameters)
 
@@ -192,7 +198,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
 
     // Error handling
 
-    private fun printError(statusCode: Int?, message: String?, error: QPError?) : Unit {
+    private fun printError(statusCode: Int?, message: String?, error: QPError?) {
         QuickPay.log("Request error")
         QuickPay.log("Message: $message")
         QuickPay.log("StatusCode: $statusCode")
@@ -211,7 +217,10 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
 
     override fun onPaymentMethodSelected(paymentMethod: PaymentMethod) {
         selectedPaymentMethod = paymentMethod
-        findViewById<Button>(R.id.shop_payment_button)?.isEnabled = true
+
+        if (progressBar?.visibility == View.INVISIBLE) {
+            checkoutButton?.isEnabled = true
+        }
     }
 
 }
