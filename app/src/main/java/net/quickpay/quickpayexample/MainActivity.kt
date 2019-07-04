@@ -212,7 +212,6 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
     override fun onPaymentMethodSelected(paymentMethod: PaymentMethod) {
         selectedPaymentMethod = paymentMethod
         findViewById<Button>(R.id.shop_payment_button)?.isEnabled = true
-        Toast.makeText(this, "${selectedPaymentMethod?.defaultTitle()} selected", Toast.LENGTH_SHORT).show()
     }
 
 }

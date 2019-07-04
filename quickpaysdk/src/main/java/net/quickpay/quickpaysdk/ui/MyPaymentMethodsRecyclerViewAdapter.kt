@@ -1,5 +1,6 @@
 package net.quickpay.quickpaysdk.ui
 
+import android.content.res.Resources
 import android.graphics.Color
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -12,19 +13,30 @@ import kotlinx.android.synthetic.main.fragment_paymentmethods.view.*
 import net.quickpay.quickpaysdk.PaymentMethod
 import net.quickpay.quickpaysdk.R
 
-class MyPaymentMethodsRecyclerViewAdapter(private val mValues: List<PaymentContent.PaymentItem>, private val mListener: PaymentMethodsFragment.OnPaymentMethodsListFragmentInteractionListener?) : RecyclerView.Adapter<MyPaymentMethodsRecyclerViewAdapter.ViewHolder>() {
+class MyPaymentMethodsRecyclerViewAdapter(
+    private val mValues: List<PaymentContent.PaymentItem>,
+    private val mListener: PaymentMethodsFragment.OnPaymentMethodsListFragmentInteractionListener?,
+    private val recyclerView: RecyclerView) : RecyclerView.Adapter<MyPaymentMethodsRecyclerViewAdapter.ViewHolder>() {
 
     private val mOnClickListener: View.OnClickListener
 
     init {
         mOnClickListener = View.OnClickListener { v ->
-            v.setBackgroundColor(Color.parseColor("#ff0000"))
+            // Reset the selection color of all the items
+            for (index in 0..itemCount) {
+                recyclerView.getChildAt(index)?.setBackgroundResource(R.drawable.border_background)
+            }
+
+            v.setBackgroundResource(R.drawable.border_background_selected)
+
 
             val item = v.tag as PaymentContent.PaymentItem
             // Notify the active callbacks interface (the activity, if the fragment is attached to
             // one) that an item has been selected.
             mListener?.onPaymentMethodSelected(item.method)
         }
+
+
     }
 
     override fun getItemViewType(position: Int): Int {

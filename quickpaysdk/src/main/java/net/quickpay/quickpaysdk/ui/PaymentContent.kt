@@ -4,10 +4,6 @@ import net.quickpay.quickpaysdk.PaymentMethod
 import net.quickpay.quickpaysdk.R
 import java.util.ArrayList
 
-/**
- * Helper class for providing sample content for user interfaces created by
- * Android template wizards.
- */
 object PaymentContent {
 
     val ITEMS: MutableList<PaymentItem> = ArrayList()
