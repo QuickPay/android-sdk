@@ -6,6 +6,13 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/backgroundBlack</item>
         <item name="colorAccent">@color/colorAccent</item>
-    </style>
 
+        <item name="quickpay_listitem_textColor">@color/quickpay_listitem_textcolor</item>
+
+        <item name="quickpay_listitem_backgroundColor">@color/quickpay_listitem_backgroundColor</item>
+        <item name="quickpay_listitem_backgroundColor_selected">@color/quickpay_listitem_backgroundColor_selected</item>
+
+        <item name="quickpay_listitem_borderColor">@color/quickpay_listitem_borderColor</item>
+        <item name="quickpay_listitem_borderColor_selected">@color/quickpay_listitem_borderColor_selected</item>
+    </style>
 </resources>

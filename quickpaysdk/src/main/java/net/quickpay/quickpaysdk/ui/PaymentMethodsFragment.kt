@@ -58,6 +58,6 @@ class PaymentMethodsFragment : Fragment() {
      * activity.
      */
     interface OnPaymentMethodsListFragmentInteractionListener {
-        fun onPaymentMethodSelected(item: PaymentMethod)
+        fun onPaymentMethodSelected(paymentMethod: PaymentMethod)
     }
 }

@@ -12,10 +12,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|fill_horizontal"
             android:layout_weight="1"
+            android:textColor="?quickpay_listitem_textColor"
             android:text="Cards"
-            android:textSize="14dp"
-            android:paddingLeft="15dp"
-            android:textAppearance="?attr/textAppearanceListItem"/>
+            android:paddingLeft="15dp" />
 
     <ImageView android:layout_width="35dp"
                android:layout_height="22dp"

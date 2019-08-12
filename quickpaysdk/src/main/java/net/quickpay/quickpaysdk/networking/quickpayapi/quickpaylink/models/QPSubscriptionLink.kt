@@ -7,6 +7,5 @@ class QPSubscriptionLink: JSONObject() {
     // Required Properties
 
     var url: String = ""
-        internal set
 
 }

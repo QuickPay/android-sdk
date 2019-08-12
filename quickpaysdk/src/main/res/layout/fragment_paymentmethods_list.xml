@@ -13,5 +13,5 @@
         tools:context=".ui.PaymentMethodsFragment"
         tools:listitem="@layout/fragment_paymentmethods">
 
-
 </android.support.v7.widget.RecyclerView>
+

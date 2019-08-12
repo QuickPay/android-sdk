@@ -11,12 +11,14 @@ import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.acquirers.QP
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.models.QPPayment
 import java.lang.RuntimeException
 
+/*
 interface InitializeListener {
 
     fun initializationStarted()
     fun initializationCompleted()
 
 }
+*/
 
 class QuickPay(internal var apiKey: String) {
 
@@ -39,7 +41,7 @@ class QuickPay(internal var apiKey: String) {
         fun init(apiKey: String, context: Context) {
             NetworkUtility.getInstance(context)
             instance = QuickPay(apiKey)
-            instance.fetchAcquirers(context)
+//            instance.fetchAcquirers(context)
         }
 
         fun log(msg: String) {
@@ -50,6 +52,7 @@ class QuickPay(internal var apiKey: String) {
 
     // Properties
 
+    /*
     var isMobilePayOnlineEnabled: Boolean? = null
     var isInitializing: Boolean = true
 
@@ -75,11 +78,12 @@ class QuickPay(internal var apiKey: String) {
             initializeListeners.forEach { it.initializationCompleted() }
         }
     }
-
+    */
 
 
     // MobilePay
 
+    /*
     private fun isMobilePayEnabled(callback: (Boolean)->Unit) {
         QPGetAcquireSettingsMobilePayRequest().sendRequest(listener = {
             log("MobilePay enabled on backend: ${it.active}")
@@ -111,4 +115,5 @@ class QuickPay(internal var apiKey: String) {
             context.startActivity(mobilePayIntent)
         }
     }
+    */
 }

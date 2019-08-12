@@ -2,10 +2,8 @@ package net.quickpay.quickpayexample
 
 import android.app.Activity
 import android.content.Intent
-import android.opengl.Visibility
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
@@ -35,7 +33,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
     private var shopItemCompomentFootball: ShopItemComponent? = null
     private var progressBar: ProgressBar? = null
     private var checkoutButton: Button? = null
-    private var currentPaymentId: Int = 0
+    private var currentPaymentId: Int? = null
     private var selectedPaymentMethod: PaymentMethod? = null
 
 
@@ -58,21 +56,8 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
         checkoutButton = findViewById(R.id.shop_payment_button)
 
         updateSummary()
-
-        // TODO: Test if this is returned from MobilePay and handle it
-        onMobilePayReturn(intent)
     }
 
-    private fun onMobilePayReturn(intent: Intent) {
-        if (intent.data == null) {
-            return
-        }
-
-        if (intent.data?.scheme?.equals("quickpayexample") == true) {
-            QuickPay.log("MainActivity id: $currentPaymentId")
-            QuickPay.log("Intent: $intent")
-        }
-    }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == QuickPayActivity.QUICKPAY_INTENT_CODE) {
@@ -84,14 +69,14 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
                 val returnedResult = data!!.data!!.toString()
                 if (returnedResult == QuickPayActivity.SUCCESS_RESULT) {
 
-                    if (currentPaymentId > 0) {
-                        val getPaymentRequest = QPGetPaymentRequest(currentPaymentId)
+                    if (currentPaymentId != null) {
+                        val getPaymentRequest = QPGetPaymentRequest(currentPaymentId!!)
 
                         getPaymentRequest.sendRequest(listener = { payment ->
                             Toast.makeText(this, "Success - Acquirer is ${payment.acquirer}", Toast.LENGTH_LONG).show()
                         }, errorListener = ::printError)
 
-                        currentPaymentId = 0
+                        currentPaymentId = null
                     }
                 }
                 else if (returnedResult == QuickPayActivity.CANCEL_RESULT) {
@@ -109,6 +94,7 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
 
     // UI Buttons
 
+    @Suppress("UNUSED_PARAMETER")
     fun onPaymentButtonClicked(v: View) {
         if (selectedPaymentMethod != null) {
             progressBar?.visibility = View.VISIBLE
@@ -117,9 +103,6 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
 
         if (selectedPaymentMethod == PaymentMethod.PAYMENTCARD) {
             handleCreditCardPayment()
-        }
-        else if (selectedPaymentMethod == PaymentMethod.MOBILEPAY) {
-            handleMobilePayPayment()
         }
     }
 
@@ -142,28 +125,6 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
 
                 // Now we open the payment window
                 QuickPayActivity.openQuickPayPaymentWindow(this, paymentLink)
-            }, errorListener = ::printError)
-        }, errorListener = ::printError)
-    }
-
-    /**
-     * TODO - Update when QuickPay has made the final revision on how to retrieve the MobilePay session id
-     */
-    private fun handleMobilePayPayment() {
-        val createPaymentParams = QPCreatePaymentParameters("DKK", createRandomOrderId())
-        val createPaymentRequest = QPCreatePaymentRequest(createPaymentParams)
-
-        createPaymentRequest.sendRequest(listener = { payment ->
-            QuickPay.log("Create Payment Success - Id = ${payment.id}")
-            currentPaymentId = payment.id
-
-            val mobilePayParameters = MobilePayParameters("quickpayexample://mobilepayreturn", "dk", "https://quickpay.net/images/payment-methods/payment-methods.png")
-            val createSessionParameters = QPCreatePaymentSessionParameters(100, mobilePayParameters)
-            val createSessionRequest = QPCreatePaymentSessionRequest(payment.id, createSessionParameters)
-
-            createSessionRequest.sendRequest(listener = { payment ->
-                QuickPay.log("Create Session Success")
-                QuickPay.instance.authorizeWithMobilePay(payment, this)
             }, errorListener = ::printError)
         }, errorListener = ::printError)
     }

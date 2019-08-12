@@ -7,6 +7,5 @@ class QPPaymentLink: JSONObject() {
     // Required Properties
 
     var url: String = ""
-    internal set
 
 }

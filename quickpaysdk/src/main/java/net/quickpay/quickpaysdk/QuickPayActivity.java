@@ -58,30 +58,30 @@ public class QuickPayActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        String requestedUrl = getIntent().getStringExtra(urlPropertyName);
-        setContentView(R.layout.activity_quick_pay);
+            super.onCreate(savedInstanceState);
+            String requestedUrl = getIntent().getStringExtra(urlPropertyName);
+            setContentView(R.layout.activity_quick_pay);
 
-        final WebView webView = (WebView) findViewById(R.id.quickpay_webview);
-        WebSettings webSettings;
-        if (webView != null) {
-            webSettings = webView.getSettings();
-            webSettings.setJavaScriptEnabled(true);
+            final WebView webView = (WebView) findViewById(R.id.quickpay_webview);
+            WebSettings webSettings;
+            if (webView != null) {
+                webSettings = webView.getSettings();
+                webSettings.setJavaScriptEnabled(true);
 
-            webView.setWebViewClient(new OverrideUrl(this));
-            webView.loadUrl(requestedUrl);
-        }
-    }
-
-    public class OverrideUrl extends WebViewClient {
-        private final Activity activity;
-
-        OverrideUrl(Activity activity) {
-            this.activity = activity;
+                webView.setWebViewClient(new OverrideUrl(this));
+                webView.loadUrl(requestedUrl);
+            }
         }
 
-        private void done(String result) {
-            Intent data = new Intent();
+        public class OverrideUrl extends WebViewClient {
+            private final Activity activity;
+
+            OverrideUrl(Activity activity) {
+                this.activity = activity;
+            }
+
+            private void done(String result) {
+                Intent data = new Intent();
             data.setData(Uri.parse(result));
 
             // Close down the activity and deliver a result.
