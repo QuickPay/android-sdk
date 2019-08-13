@@ -16,12 +16,13 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.Objects;
 
 public class ObjectRequest<T> extends JsonRequest<T> {
 
     private final Class clazz;
     private final Response.Listener<T> listener;
-    private String mUrl;
+    private final String mUrl;
     private String mRequestBody;
     private static final String PROTOCOL_CHARSET="utf-8";
     private static final String TAG="ObjectRequest";
@@ -67,7 +68,6 @@ public class ObjectRequest<T> extends JsonRequest<T> {
     @Override
     protected Response parseNetworkResponse(NetworkResponse response) {
         try {
-
             String json = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
 
             if (clazz.getName().equals(JSONObject.class.getName())) {
@@ -89,7 +89,7 @@ public class ObjectRequest<T> extends JsonRequest<T> {
                 return Response.success(new Gson().fromJson(json, clazz), HttpHeaderParser.parseCacheHeaders(response));
             }
         }catch (UnsupportedEncodingException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, Objects.requireNonNull(e.getMessage()));
             return Response.error(new ParseError(e));
         }
     }

@@ -2,7 +2,7 @@ package net.quickpay.quickpaysdk.ui
 
 import android.content.res.Resources
 import android.graphics.Color
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +16,8 @@ import net.quickpay.quickpaysdk.R
 class MyPaymentMethodsRecyclerViewAdapter(
     private val mValues: List<PaymentContent.PaymentItem>,
     private val mListener: PaymentMethodsFragment.OnPaymentMethodsListFragmentInteractionListener?,
-    private val recyclerView: RecyclerView) : RecyclerView.Adapter<MyPaymentMethodsRecyclerViewAdapter.ViewHolder>() {
+    private val recyclerView: androidx.recyclerview.widget.RecyclerView
+) : androidx.recyclerview.widget.RecyclerView.Adapter<MyPaymentMethodsRecyclerViewAdapter.ViewHolder>() {
 
     private val mOnClickListener: View.OnClickListener
 
@@ -68,7 +69,7 @@ class MyPaymentMethodsRecyclerViewAdapter(
 
     override fun getItemCount(): Int = mValues.size
 
-    inner class ViewHolder(val mView: View) : RecyclerView.ViewHolder(mView) {
+    inner class ViewHolder(val mView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(mView) {
         val mTitleView: TextView = mView.item_title
         val mLayout: LinearLayout = mView.item_layout
     }

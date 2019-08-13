@@ -28,18 +28,18 @@ class QuickPay(internal var apiKey: String) {
         private const val MOBILE_PAY_SCHEME = "mobilepayonline://"
         private const val LOGTAG = "QuickpayAct"
 
-        private var _instance: QuickPay? = null
+        private var backingInstance: QuickPay? = null
         var instance: QuickPay
             get() {
-                return _instance ?: throw RuntimeException("The QuickPay SDK needs to be initialized before usage. \nQuickPay.init(\"<API_KEY>\", <CONTEXT>)")
+                return backingInstance ?: throw RuntimeException("The QuickPay SDK needs to be initialized before usage. \nQuickPay.init(\"<API_KEY>\", <CONTEXT>)")
             }
             private set(value) {
-                _instance = value
+                backingInstance = value
             }
 
         // Static Init
         fun init(apiKey: String, context: Context) {
-            NetworkUtility.getInstance(context)
+            NetworkUtility.init(context)
             instance = QuickPay(apiKey)
 //            instance.fetchAcquirers(context)
         }

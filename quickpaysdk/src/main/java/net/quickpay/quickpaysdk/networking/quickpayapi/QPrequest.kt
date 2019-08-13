@@ -25,7 +25,7 @@ open class QPrequest<T>(private val method: Int, private val path: String, prote
     private fun createHeaders() : Map<String, String> {
         val qpHeaders = QPHeaders()
 
-        var headers = HashMap<String, String>()
+        val headers = HashMap<String, String>()
         headers["Authorization"] = qpHeaders.encodedAuthorization()
         headers["Accept-Version"] = qpHeaders.acceptVersion
         headers["Content-Type"] = "application/json"
@@ -38,13 +38,13 @@ open class QPrequest<T>(private val method: Int, private val path: String, prote
         val request = ObjectRequest<T>(method, "$quickPayApiBaseUrl$path", params, clazz, Response.Listener {
             listener.invoke(it)
         }, Response.ErrorListener {
-            var message: String? = try {
+            val message: String? = try {
                 String(it.networkResponse.data)
             } catch (e: Exception) {
                 it.message
             }
 
-            var qpError: QPError? = try {
+            val qpError: QPError? = try {
                 Gson().fromJson(message, QPError::class.java)
             }
             catch (e: Exception) {

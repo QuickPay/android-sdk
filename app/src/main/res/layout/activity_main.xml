@@ -12,7 +12,7 @@
         android:showDividers="middle"
         android:divider="@drawable/empty_divider">
 
-    <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
+    <androidx.appcompat.widget.Toolbar android:id="@+id/toolbar"
                                        android:layout_width="match_parent"
                                        android:layout_height="?attr/actionBarSize"
                                        android:background="@color/backgroundBlack"
@@ -23,7 +23,7 @@
                    android:src="@drawable/qp_log_inverse"
                    android:paddingBottom="5dp"
                    android:paddingTop="5dp"/>
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
         
     <TextView android:layout_width="wrap_content"

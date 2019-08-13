@@ -9,20 +9,17 @@ import com.android.volley.toolbox.Volley;
 // Singleton class, to access an instance of Volley to send http requests.
 public class NetworkUtility {
 
-    static NetworkUtility instance = null;
-    private RequestQueue requestQueue;
+    private static NetworkUtility instance = null;
+    private final RequestQueue requestQueue;
 
     // Private constructor for Singleton pattern.
     private NetworkUtility(Context context) {
         requestQueue = Volley.newRequestQueue(context.getApplicationContext());
     }
 
-    public static synchronized NetworkUtility getInstance(Context context) {
-        if (instance == null) {
-            instance = new NetworkUtility(context);
-            instance.requestQueue.start();
-        }
-        return instance;
+    public static synchronized void init(Context context) {
+        instance = new NetworkUtility(context);
+        instance.requestQueue.start();
     }
 
     /**
@@ -32,7 +29,7 @@ public class NetworkUtility {
      */
     public static NetworkUtility getInstance() {
         if (instance == null) {
-            throw new IllegalStateException("No NetworkUtility has been created. You need to call NetworkUtility.getInstance( context ) first.");
+            throw new IllegalStateException("No NetworkUtility has been created. You need to call NetworkUtility.init( context ) first.");
         } else {
             return instance;
         }

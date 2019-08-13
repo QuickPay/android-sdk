@@ -2,7 +2,7 @@ package net.quickpay.quickpayexample
 
 import android.app.Activity
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -65,7 +65,6 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
             checkoutButton?.isEnabled = true
 
             if (resultCode == Activity.RESULT_OK) {
-
                 val returnedResult = data!!.data!!.toString()
                 if (returnedResult == QuickPayActivity.SUCCESS_RESULT) {
 
@@ -133,11 +132,11 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
     // Utils
 
     private fun updateSummary() {
-        var tShirtCount = shopItemCompomentTshit?.counter ?: 0
-        var footballCount = shopItemCompomentFootball?.counter ?: 0
+        val tShirtCount = shopItemCompomentTshit?.counter ?: 0
+        val footballCount = shopItemCompomentFootball?.counter ?: 0
 
-        var tshirtTotal = TSHIRT_PRICE * tShirtCount
-        var footballTotal = FOOTBALL_PRICE * footballCount
+        val tshirtTotal = TSHIRT_PRICE * tShirtCount
+        val footballTotal = FOOTBALL_PRICE * footballCount
 
         findViewById<TextView>(R.id.shop_summary_tshirt_count)?.text = String.format(resources.getString(R.string.tshirt_count), tShirtCount)
         findViewById<TextView>(R.id.shop_summary_tshirt_price)?.text = String.format(resources.getString(R.string.total_dkk), tshirtTotal)

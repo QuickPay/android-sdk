@@ -11,7 +11,7 @@ class QPCreatePaymentSessionRequest(id: Int, params: QPCreatePaymentSessionParam
 class QPCreatePaymentSessionParameters(amount: Int): JSONObject() {
 
     constructor(amount: Int, mobilePayParameters: MobilePayParameters): this(amount) {
-        extras.put("mobilepay", mobilePayParameters)
+        extras["mobilepay"] = mobilePayParameters
         acquirer = "mobilepay"
     }
 

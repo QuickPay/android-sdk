@@ -1,14 +1,14 @@
 package net.quickpay.quickpaysdk;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.models.QPPaymentLink;
@@ -22,7 +22,7 @@ public class QuickPayActivity extends AppCompatActivity {
     public static final String SUCCESS_RESULT = "Success";
     public static final String CANCEL_RESULT = "Cancel";
 
-    public static final String urlPropertyName = "quickpayLink";
+    private static final String urlPropertyName = "quickpayLink";
     public static final int QUICKPAY_INTENT_CODE = 1318;
 
     /**
@@ -51,29 +51,25 @@ public class QuickPayActivity extends AppCompatActivity {
         a.startActivityForResult(intent, QUICKPAY_INTENT_CODE);
     }
 
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-    }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            String requestedUrl = getIntent().getStringExtra(urlPropertyName);
-            setContentView(R.layout.activity_quick_pay);
+        super.onCreate(savedInstanceState);
+        String requestedUrl = getIntent().getStringExtra(urlPropertyName);
+        setContentView(R.layout.activity_quick_pay);
 
-            final WebView webView = (WebView) findViewById(R.id.quickpay_webview);
-            WebSettings webSettings;
-            if (webView != null) {
-                webSettings = webView.getSettings();
-                webSettings.setJavaScriptEnabled(true);
+        final WebView webView = findViewById(R.id.quickpay_webview);
 
-                webView.setWebViewClient(new OverrideUrl(this));
-                webView.loadUrl(requestedUrl);
-            }
+        if (webView != null) {
+            webView.getSettings().setJavaScriptEnabled(true);
+
+            webView.setWebViewClient(new OverrideUrl(this));
+            webView.loadUrl(requestedUrl);
         }
+    }
 
-        public class OverrideUrl extends WebViewClient {
+        private class OverrideUrl extends WebViewClient {
             private final Activity activity;
 
             OverrideUrl(Activity activity) {
