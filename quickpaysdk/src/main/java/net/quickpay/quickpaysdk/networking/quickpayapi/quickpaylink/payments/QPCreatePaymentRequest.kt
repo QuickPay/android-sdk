@@ -10,7 +10,7 @@ import org.json.JSONObject
 
 class QPCreatePaymentRequest(params: QPCreatePaymentParameters): QPrequest<QPPayment>(Request.Method.POST, "/payments", params, QPPayment::class.java)
 
-class QPCreatePaymentParameters(currency: String,order_id: String): JSONObject() {
+class QPCreatePaymentParameters(currency: String, order_id: String): JSONObject() {
 
     // Required Properties
 

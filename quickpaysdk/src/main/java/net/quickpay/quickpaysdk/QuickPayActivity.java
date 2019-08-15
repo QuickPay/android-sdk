@@ -16,11 +16,11 @@ import net.quickpay.quickpaysdk.networking.quickpayapi.quickpaylink.models.QPSub
 
 
 public class QuickPayActivity extends AppCompatActivity {
-    public final static String CONTINUE_URL = "https://qp.payment.success";
-    public final static String CANCEL_URL = "https://qp.payment.failure";
+    public final static String SUCCESS_URL = "https://qp.payment.success";
+    public final static String FAILURE_URL = "https://qp.payment.failure";
 
     public static final String SUCCESS_RESULT = "Success";
-    public static final String CANCEL_RESULT = "Cancel";
+    public static final String FAILURE_RESULT = "Failure";
 
     private static final String urlPropertyName = "quickpayLink";
     public static final int QUICKPAY_INTENT_CODE = 1318;
@@ -69,15 +69,15 @@ public class QuickPayActivity extends AppCompatActivity {
         }
     }
 
-        private class OverrideUrl extends WebViewClient {
-            private final Activity activity;
+    private class OverrideUrl extends WebViewClient {
+        private final Activity activity;
 
-            OverrideUrl(Activity activity) {
-                this.activity = activity;
-            }
+        OverrideUrl(Activity activity) {
+            this.activity = activity;
+        }
 
-            private void done(String result) {
-                Intent data = new Intent();
+        private void done(String result) {
+            Intent data = new Intent();
             data.setData(Uri.parse(result));
 
             // Close down the activity and deliver a result.
@@ -87,12 +87,12 @@ public class QuickPayActivity extends AppCompatActivity {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            if (url.contains(CONTINUE_URL)) {
+            if (url.contains(SUCCESS_URL)) {
                 this.done(SUCCESS_RESULT);
                 return true;
             }
-            else if (url.contains(CANCEL_URL)) {
-                this.done(CANCEL_RESULT);
+            else if (url.contains(FAILURE_URL)) {
+                this.done(FAILURE_RESULT);
                 return true;
             }
             return false;

@@ -9,8 +9,8 @@ import org.json.JSONObject
 class QPCreateSubscriptionLinkRequest(params: QPCreateSubscriptionLinkParameters): QPrequest<QPSubscriptionLink>(Request.Method.PUT, "/subscriptions/${params.id}/link", params, QPSubscriptionLink::class.java) {
 
     init {
-        params.cancel_url = QuickPayActivity.CANCEL_URL
-        params.continue_url = QuickPayActivity.CONTINUE_URL
+        params.cancel_url = QuickPayActivity.FAILURE_URL
+        params.continue_url = QuickPayActivity.SUCCESS_URL
     }
 
 }

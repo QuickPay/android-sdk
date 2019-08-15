@@ -11,8 +11,8 @@ import net.quickpay.quickpaysdk.QuickPayActivity
 class QPCreatePaymentLinkRequest(params: QPCreatePaymentLinkParameters): QPrequest<QPPaymentLink>(Request.Method.PUT, "/payments/${params.id}/link", params, QPPaymentLink::class.java) {
 
     init {
-        params.cancel_url = QuickPayActivity.CANCEL_URL
-        params.continue_url = QuickPayActivity.CONTINUE_URL
+        params.cancel_url = QuickPayActivity.FAILURE_URL
+        params.continue_url = QuickPayActivity.SUCCESS_URL
     }
 
 }

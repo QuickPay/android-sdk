@@ -59,26 +59,31 @@ class MainActivity : AppCompatActivity(), PaymentMethodsFragment.OnPaymentMethod
     }
 
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
         if (requestCode == QuickPayActivity.QUICKPAY_INTENT_CODE) {
             progressBar?.visibility = View.INVISIBLE
             checkoutButton?.isEnabled = true
 
             if (resultCode == Activity.RESULT_OK) {
-                val returnedResult = data!!.data!!.toString()
-                if (returnedResult == QuickPayActivity.SUCCESS_RESULT) {
+                val returnedResult = intent?.data?.toString() ?: ""
 
+                if (returnedResult == QuickPayActivity.SUCCESS_RESULT) {
                     if (currentPaymentId != null) {
                         val getPaymentRequest = QPGetPaymentRequest(currentPaymentId!!)
 
                         getPaymentRequest.sendRequest(listener = { payment ->
-                            Toast.makeText(this, "Success - Acquirer is ${payment.acquirer}", Toast.LENGTH_LONG).show()
+                            if (payment.accepted) {
+                                Toast.makeText(this, "Success - Acquirer is ${payment.acquirer}", Toast.LENGTH_LONG).show()
+                            }
+                            else {
+                                Toast.makeText(this, "Failure", Toast.LENGTH_LONG).show()
+                            }
                         }, errorListener = ::printError)
 
                         currentPaymentId = null
                     }
                 }
-                else if (returnedResult == QuickPayActivity.CANCEL_RESULT) {
+                else if (returnedResult == QuickPayActivity.FAILURE_RESULT) {
                     val toast = Toast.makeText(this, "Result: $returnedResult", Toast.LENGTH_LONG)
                     toast.show()
                 }
