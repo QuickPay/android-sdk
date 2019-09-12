@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
@@ -64,15 +65,16 @@ public class QuickPayActivity extends AppCompatActivity {
         if (webView != null) {
             webView.getSettings().setJavaScriptEnabled(true);
 
-            webView.setWebViewClient(new OverrideUrl(this));
+            webView.setWebViewClient(new QPWebViewClient(this));
+            webView.setWebChromeClient(new WebChromeClient());
             webView.loadUrl(requestedUrl);
         }
     }
 
-    private class OverrideUrl extends WebViewClient {
+    private class QPWebViewClient extends WebViewClient {
         private final Activity activity;
 
-        OverrideUrl(Activity activity) {
+        QPWebViewClient(Activity activity) {
             this.activity = activity;
         }
 

@@ -20,12 +20,12 @@ interface InitializeListener {
 }
 */
 
-class QuickPay(internal var apiKey: String) {
+public class QuickPay(internal var apiKey: String) {
 
     // Singleton
 
     companion object {
-        private const val MOBILE_PAY_SCHEME = "mobilepayonline://"
+//        private const val MOBILE_PAY_SCHEME = "mobilepayonline://"
         private const val LOGTAG = "QuickpayAct"
 
         private var backingInstance: QuickPay? = null

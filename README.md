@@ -5,8 +5,15 @@ The QuickPay SDK wraps the [QuickPay API](https://learn.quickpay.net/tech-talk/a
 
 ## Installation
 
-You can install the QuickPay SDK either by downloading it directly from our GitHub repo or by using a package manager
-TODO: Describe which package manager is used and how to install the SDK from it
+You can find the newest version of the QuickPay SDK on the GitHub repo. We are working on releasing it through a package manager in the future.
+
+
+### AndroidManifest
+
+You will need to add an activity to your AndroidManifest.xml in order to show the payment window.
+```xml
+<activity android:name="net.quickpay.quickpaysdk.QuickPayActivity" />
+```
 
 
 ### API key
@@ -15,10 +22,12 @@ In order for the SDK to communicate with QuickPay, you will need an API key. You
 
 
 ## Usage
+
 This guide will take you through the steps needed to integrate the QuickPay SDK with your code and demonstrate how to make basic payments with the different payment methods the SDK supports.
 
 
 ### Initialization
+
 In your MainActivity, you need to initialize the SDK with your API key and Context.
 ```kotlin
 QuickPay.init(apiKey: String, context: Context)
